@@ -32,5 +32,14 @@ bool MainScene::init()
         addChild(map);
     }
 
+    // DEBUG: Log dt every frame
+    scheduleUpdate();
+
     return true;
+}
+
+void MainScene::update(float delta)
+{
+    Scene::update(delta);
+    AXLOGD("{}", delta);
 }

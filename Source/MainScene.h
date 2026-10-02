@@ -18,6 +18,8 @@ public:
         ax::Scene::onExit();
     }
 
+    void update(float delta) override;
+
 
     MainScene() {}
     ~MainScene() override {}
