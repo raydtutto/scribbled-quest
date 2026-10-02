@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="60" tileheight="60" infinite="0" backgroundcolor="#ffffff" nextlayerid="10" nextobjectid="19">
+ <tileset firstgid="1" name="tilesheet_test" tilewidth="64" tileheight="64" tilecount="192" columns="16" objectalignment="center">
+  <tileoffset x="-2" y="2"/>
+  <image source="../../res/spritesheet/tilesheet_test.png" width="1024" height="768"/>
+ </tileset>
+ <layer id="1" name="ground" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMNRAKRKmNYiigx0gIAjEQkj8TDrZywjFgmgYH3ABYmcojQxCSLC3ggS1yMAVi51OZJpFCkAPH1IxIw5cTsBebHrY8ZiHDyPr4ySAyTUXhgGdRgcL
+  </data>
+ </layer>
+ <layer id="2" name="chars" width="30" height="20" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMBRAC53sWUiGHnq5jVjAM9AOoDFQh9IaWOQWo/GlsKgZbPE1HAEADRQDRg==
+  </data>
+ </layer>
+ <layer id="4" name="secret" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMApGAb0BIw48EPay08HekQYAJJAAEw==
+  </data>
+ </layer>
+ <objectgroup id="7" name="entities">
+  <object id="1" name="player" x="9.33337" y="784.667" width="41.3333" height="48">
+   <properties>
+    <property name="type" value="player"/>
+   </properties>
+  </object>
+  <object id="10" name="enemy" x="1330.67" y="969.333" width="37.3333" height="40"/>
+  <object id="11" name="star" x="251.333" y="729.333" width="38" height="38">
+   <ellipse/>
+  </object>
+  <object id="12" name="star" x="791.667" y="789" width="38" height="38">
+   <ellipse/>
+  </object>
+  <object id="13" name="key" x="909" y="970.333" width="38" height="38">
+   <ellipse/>
+  </object>
+  <object id="14" x="1150.33" y="850.333" width="38" height="38">
+   <ellipse/>
+  </object>
+  <object id="16" name="chest" x="1568" y="966.667" width="45.3333" height="45.3333">
+   <ellipse/>
+  </object>
+  <object id="18" name="star" x="67.6667" y="1030.33" width="38" height="38">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup id="8" name="obstacles">
+  <object id="4" name="secret" x="6.66667" y="963" width="346.667" height="111.333"/>
+  <object id="5" name="jump" x="363.667" y="1023" width="52" height="52"/>
+  <object id="15" name="spikes" x="1021.33" y="988.75" width="55.7917" height="28.5417"/>
+ </objectgroup>
+</map>

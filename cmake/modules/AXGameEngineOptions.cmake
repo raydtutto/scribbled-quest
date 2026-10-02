@@ -18,14 +18,14 @@
  set(AX_ENABLE_EXT_JSONDEFAULT OFF CACHE BOOL "Build extension JSONDefault" FORCE)
 
 # 3D Support - - default: ON
- set(AX_ENABLE_3D OFF CACHE BOOL "Build 3D support" FORCE)
+ set(AX_ENABLE_3D ON CACHE BOOL "Build 3D support" FORCE)
 # These depend on AX_EXT_HINT & AX_ENABLE_3D
- set(AX_ENABLE_EXT_PARTICLE3D OFF CACHE BOOL "Build extension Particle3D" FORCE)
+ set(AX_ENABLE_EXT_PARTICLE3D ON CACHE BOOL "Build extension Particle3D" FORCE)
  set(AX_ENABLE_PHYSICS_3D OFF CACHE BOOL "Build Physics3D support" FORCE)
  set(AX_ENABLE_NAVMESH OFF CACHE BOOL "Build NavMesh support" FORCE)
 
 # Physics 2D Support - - default: ON
- set(AX_ENABLE_PHYSICS_2D OFF CACHE BOOL "Build Physics support" FORCE)
+ set(AX_ENABLE_PHYSICS_2D ON CACHE BOOL "Build Physics support" FORCE)
 # These depend on AX_EXT_HINT & AX_ENABLE_PHYSICS
  set(AX_ENABLE_EXT_PHYSICS_NODE OFF CACHE BOOL "Build extension physics-nodes" FORCE)
 
