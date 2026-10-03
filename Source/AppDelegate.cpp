@@ -8,7 +8,7 @@
  ****************************************************************************/
 
 #include "AppDelegate.h"
-#include "MainScene.h"
+#include "gameplay/GameScene.h"
 
 #define USE_VR_RENDERER  0
 #define USE_AUDIO_ENGINE 1
@@ -112,7 +112,7 @@ bool AppDelegate::applicationDidFinishLaunching()
                                         ResolutionPolicy::SHOW_ALL);
 
     // create a scene. it's an autorelease object
-    auto scene = utils::createInstance<MainScene>();
+    auto scene = GameScene::create();
 
     // run
     director->runWithScene(scene);

@@ -12,7 +12,6 @@
 using namespace ax;
 
 
-
 // on "init" you need to initialize your instance
 bool MainScene::init()
 {
@@ -22,9 +21,6 @@ bool MainScene::init()
     {
         return false;
     }
-
-    auto whiteBackground = LayerColor::create(Color32::white);
-    addChild(whiteBackground);
 
     auto map = ax::FastTMXTiledMap::create("levels/test_level/test.tmx");
     if (map)
