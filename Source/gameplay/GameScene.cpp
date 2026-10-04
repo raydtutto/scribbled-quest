@@ -25,10 +25,15 @@ bool GameScene::init()
         return false;
     }
 
-    auto bgLayer = LayerColor::create(Color32::yellow);
-    if (bgLayer)
+    if (auto bgLayer = LayerColor::create(Color32::white))
     {
         addChild(bgLayer);
+    }
+
+    _gameLayer = GameLayer::create("levels/test_level/test.tmx");
+    if (_gameLayer)
+    {
+        addChild(_gameLayer);
     }
 
     return true;
@@ -44,4 +49,9 @@ void GameScene::onExit()
 {
     ax::extension::Inspector::getInstance()->close();
     ax::Scene::onExit();
+}
+
+GameScene::~GameScene()
+{
+    _gameLayer = nullptr;
 }

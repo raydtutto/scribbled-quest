@@ -2,6 +2,7 @@
 
 
 #include "axmol/axmol.h"
+#include "gameplay/GameLayer.h"
 
 
 class GameScene : public ax::Scene
@@ -15,5 +16,8 @@ public:
     void onExit() override;
 
     GameScene() {}
-    ~GameScene() override {}
+    ~GameScene() override;
+
+private:
+    GameLayer* _gameLayer = nullptr;
 };

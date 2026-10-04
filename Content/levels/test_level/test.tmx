@@ -25,27 +25,49 @@
     <property name="type" value="player"/>
    </properties>
   </object>
-  <object id="10" name="enemy" x="1330.67" y="969.333" width="37.3333" height="40"/>
+  <object id="10" name="enemy" x="1330.67" y="969.333" width="37.3333" height="40">
+   <properties>
+    <property name="type" value="enemy"/>
+   </properties>
+  </object>
   <object id="11" name="star" x="251.333" y="729.333" width="38" height="38">
+   <properties>
+    <property name="type" value="star"/>
+   </properties>
    <ellipse/>
   </object>
   <object id="12" name="star" x="791.667" y="789" width="38" height="38">
+   <properties>
+    <property name="type" value="star"/>
+   </properties>
    <ellipse/>
   </object>
   <object id="13" name="key" x="909" y="970.333" width="38" height="38">
+   <properties>
+    <property name="type" value="key"/>
+   </properties>
    <ellipse/>
   </object>
   <object id="14" x="1150.33" y="850.333" width="38" height="38">
+   <properties>
+    <property name="type" value="star"/>
+   </properties>
    <ellipse/>
   </object>
   <object id="16" name="chest" x="1568" y="966.667" width="45.3333" height="45.3333">
+   <properties>
+    <property name="type" value="chest"/>
+   </properties>
    <ellipse/>
   </object>
   <object id="18" name="star" x="67.6667" y="1030.33" width="38" height="38">
+   <properties>
+    <property name="type" value="star"/>
+   </properties>
    <ellipse/>
   </object>
  </objectgroup>
- <objectgroup id="8" name="obstacles">
+ <objectgroup id="8" name="obstacles" visible="0">
   <object id="4" name="secret" x="6.66667" y="963" width="346.667" height="111.333"/>
   <object id="5" name="jump" x="363.667" y="1023" width="52" height="52"/>
   <object id="15" name="spikes" x="1021.33" y="988.75" width="55.7917" height="28.5417"/>

@@ -22,12 +22,6 @@ bool MainScene::init()
         return false;
     }
 
-    auto map = ax::FastTMXTiledMap::create("levels/test_level/test.tmx");
-    if (map)
-    {
-        addChild(map);
-    }
-
     // DEBUG: Log dt every frame
     scheduleUpdate();
 
