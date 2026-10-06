@@ -48,7 +48,7 @@ PointerAlignment: Left
 
 # ANGLE likes to align things as much as possible.
 AlignOperands: true
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments: false
 
 # Use 0 space negative offset for access modifiers
 AccessModifierOffset: -4
