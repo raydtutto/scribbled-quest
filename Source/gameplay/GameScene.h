@@ -1,9 +1,7 @@
 #pragma once
 
-
 #include "axmol/axmol.h"
 #include "gameplay/GameLayer.h"
-
 
 class GameScene : public ax::Scene
 {

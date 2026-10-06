@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="60" tileheight="60" infinite="0" backgroundcolor="#ffffff" nextlayerid="10" nextobjectid="19">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="60" tileheight="60" infinite="0" backgroundcolor="#ffffff" nextlayerid="11" nextobjectid="40">
  <tileset firstgid="1" name="tilesheet_test" tilewidth="64" tileheight="64" tilecount="192" columns="16" objectalignment="center">
   <tileoffset x="-2" y="2"/>
   <image source="../../res/spritesheet/tilesheet_test.png" width="1024" height="768"/>
  </tileset>
  <layer id="1" name="ground" width="30" height="20">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMNRAKRKmNYiigx0gIAjEQkj8TDrZywjFgmgYH3ABYmcojQxCSLC3ggS1yMAVi51OZJpFCkAPH1IxIw5cTsBebHrY8ZiHDyPr4ySAyTUXhgGdRgcL
+   eJxjYBgFo2AUjIJRMNRAKRKmNYiigx0gIIjGz6STvYxQu9ExPuACxM5QGhmEkGBvBQlqkYErFjudyDSLFIAtjEjBjDhwOQF7selhx2MePoysj5MAJtdcGAYAkC4HCQ==
   </data>
  </layer>
  <layer id="2" name="chars" width="30" height="20" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztwTEBAAAAwqD1T20JT6AAAHgaCWAAAQ==
+  </data>
+ </layer>
+ <layer id="10" name="chars ref" width="30" height="20" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBgFo2AUjIJRMBRAC53sWUiGHnq5jVjAM9AOoDFQh9IaWOQWo/GlsKgZbPE1HAEADRQDRg==
   </data>
@@ -20,56 +25,132 @@
   </data>
  </layer>
  <objectgroup id="7" name="entities">
-  <object id="1" name="player" x="9.33337" y="784.667" width="41.3333" height="48">
+  <object id="1" name="player" x="0" y="780" width="60" height="60">
    <properties>
     <property name="type" value="player"/>
    </properties>
   </object>
-  <object id="10" name="enemy" x="1330.67" y="969.333" width="37.3333" height="40">
+  <object id="10" name="enemy" x="480" y="660" width="60" height="60">
    <properties>
     <property name="type" value="enemy"/>
    </properties>
   </object>
   <object id="11" name="star" x="251.333" y="729.333" width="38" height="38">
    <properties>
-    <property name="type" value="star"/>
+    <property name="type" value="world_object"/>
    </properties>
    <ellipse/>
   </object>
   <object id="12" name="star" x="791.667" y="789" width="38" height="38">
    <properties>
-    <property name="type" value="star"/>
+    <property name="type" value="world_object"/>
    </properties>
    <ellipse/>
   </object>
   <object id="13" name="key" x="909" y="970.333" width="38" height="38">
    <properties>
-    <property name="type" value="key"/>
+    <property name="type" value="world_object"/>
    </properties>
    <ellipse/>
   </object>
-  <object id="14" x="1150.33" y="850.333" width="38" height="38">
+  <object id="14" name="star" x="1150.33" y="850.333" width="38" height="38">
    <properties>
-    <property name="type" value="star"/>
+    <property name="type" value="world_object"/>
    </properties>
    <ellipse/>
   </object>
   <object id="16" name="chest" x="1568" y="966.667" width="45.3333" height="45.3333">
    <properties>
-    <property name="type" value="chest"/>
+    <property name="type" value="world_object"/>
    </properties>
    <ellipse/>
   </object>
   <object id="18" name="star" x="67.6667" y="1030.33" width="38" height="38">
    <properties>
-    <property name="type" value="star"/>
+    <property name="type" value="world_object"/>
    </properties>
    <ellipse/>
   </object>
  </objectgroup>
- <objectgroup id="8" name="obstacles" visible="0">
-  <object id="4" name="secret" x="6.66667" y="963" width="346.667" height="111.333"/>
+ <objectgroup id="8" name="obstacles">
+  <object id="4" name="secret" x="0" y="960" width="360" height="120"/>
   <object id="5" name="jump" x="363.667" y="1023" width="52" height="52"/>
-  <object id="15" name="spikes" x="1021.33" y="988.75" width="55.7917" height="28.5417"/>
+  <object id="15" name="spikes" x="1020" y="989" width="60" height="31">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="19" x="420" y="734" width="180" height="32">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="20" x="240" y="780" width="60" height="12">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="23" x="1140" y="900" width="60" height="120">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="24" x="1080" y="960" width="60" height="60">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="25" x="360" y="1080" width="60" height="10">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="26" x="0" y="840" width="60" height="60">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="27" x="0" y="900" width="360" height="60">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="28" x="840" y="1020" width="960" height="180">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="32" x="780" y="900" width="180" height="20"/>
+  <object id="33" x="859" y="920" width="22" height="100"/>
+  <object id="34" x="244" y="792" width="52" height="14">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="35" x="249" y="806" width="42" height="68">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="36" x="240" y="888" width="60" height="12">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="37" x="244" y="874" width="52" height="14">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="38" x="0" y="1080" width="360" height="120">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
+  <object id="39" x="360" y="1170" width="480" height="30">
+   <properties>
+    <property name="type" value="obstacle"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

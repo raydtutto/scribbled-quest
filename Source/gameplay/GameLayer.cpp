@@ -1,6 +1,13 @@
 #include "GameLayer.h"
 
 #include "axmol/2d/FastTMXTiledMap.h"
+#include "axmol/2d/DrawNode.h"
+#include "gameplay/Obstacle.h"
+#include "gameplay/Player.h"
+#include "gameplay/Enemy.h"
+
+// Drawing level collisions
+#define DEBUG_DRAW 1
 
 using namespace ax;
 
@@ -16,14 +23,11 @@ std::string getTypeName(eGameLayerType type)
     case eGameLayerType::ENEMY:
         return "enemy";
         break;
-    case eGameLayerType::CHEST:
-        return "chest";
+    case eGameLayerType::WORLD_OBJECT:
+        return "world_object";
         break;
-    case eGameLayerType::STAR:
-        return "star";
-        break;
-    case eGameLayerType::KEY:
-        return "key";
+    case eGameLayerType::OBSTACLE:
+        return "obstacle";
         break;
     default:
         return "";
@@ -38,17 +42,14 @@ eGameLayerType getEntityType(const std::string& typeName)
         return eGameLayerType::PLAYER;
     if (typeName == "enemy")
         return eGameLayerType::ENEMY;
-    if (typeName == "chest")
-        return eGameLayerType::CHEST;
-    if (typeName == "star")
-        return eGameLayerType::STAR;
-    if (typeName == "key")
-        return eGameLayerType::KEY;
+    if (typeName == "world_object")
+        return eGameLayerType::WORLD_OBJECT;
+    if (typeName == "obstacle")
+        return eGameLayerType::OBSTACLE;
 
     return eGameLayerType::NONE;
 }
-}
-
+}  // namespace
 
 GameLayer* GameLayer::create(const std::string& levelName)
 {
@@ -86,6 +87,7 @@ bool GameLayer::loadLevel(const std::string& levelName)
 
     addChild(_tmxMap);
     loadEntities();
+    loadObstacles();
 
     return true;
 }
@@ -100,13 +102,15 @@ void GameLayer::loadEntities()
     auto entitiesGroup = _tmxMap->getObjectGroup("entities");
     auto tileSize = _tmxMap->getTileSize();
 
-    for (const auto& entity : entitiesGroup->getObjects())
+    _spawnEntity.clear();
+    for (const auto& entityObj : entitiesGroup->getObjects())
     {
-        if (entity.getType() == Value::Type::MAP)
+        if (entityObj.getType() == Value::Type::MAP)
         {
-            auto val = entity.asValueMap();
+            auto val = entityObj.asValueMap();
 
-            if (val["type"].getType() != Value::Type::STRING || getEntityType(val["type"].asString()) == eGameLayerType::NONE)
+            if (val["type"].getType() != Value::Type::STRING ||
+                getEntityType(val["type"].asString()) == eGameLayerType::NONE)
             {
                 AXLOGE("The entity '{}' failed to load, unsupported type.", val["id"].asString());
                 continue;
@@ -114,7 +118,7 @@ void GameLayer::loadEntities()
             std::string id = val["id"].asString();
             auto type = getEntityType(val["type"].asString());
 
-            // Get tile position on the map, counted from the bottom
+            // Get position tile numbers on the map, counted from the bottom
             auto tileX = static_cast<int>(val["x"].asFloat() + val["width"].asFloat() / 2);
             auto tileY = static_cast<int>(val["y"].asFloat() + val["height"].asFloat() / 2);
             auto tilePos = getTilePosition(tileSize, tileX, tileY);
@@ -122,8 +126,57 @@ void GameLayer::loadEntities()
 
             if (type == eGameLayerType::PLAYER)
             {
-                // spawn player
+                if (Player* player = Player::create())
+                {
+                    addChild(player);
+                    player->setPosition(val["x"].asFloat(), val["y"].asFloat());
+
+                    _spawnEntity.push_back(sSpawnEntity(eGameLayerType::PLAYER, player, tilePos));
+                }
             }
+
+            if (type == eGameLayerType::ENEMY)
+            {
+                Enemy* enemy = Enemy::create();
+                if (enemy)
+                {
+                    addChild(enemy);
+                    AXLOGD("Enemy created.");
+
+                    auto x = val["x"].asFloat();
+                    auto y = val["y"].asFloat();
+
+                    enemy->setPosition(val["x"].asFloat(), val["y"].asFloat());
+                }
+            }
+        }
+    }
+}
+void GameLayer::loadObstacles()
+{
+    auto obstaclesGroup = _tmxMap->getObjectGroup("obstacles");
+    for (const auto& obstacleObj : obstaclesGroup->getObjects())
+    {
+        if (obstacleObj.getType() == Value::Type::MAP)
+        {
+            auto val = obstacleObj.asValueMap();
+            auto rect = ax::Rect();
+            rect.origin.x = val["x"].asFloat();
+            rect.origin.y = val["y"].asFloat();
+            rect.size.width = val["width"].asFloat();
+            rect.size.height = val["height"].asFloat();
+
+            _collisionList.push_back(rect);
+
+#ifdef DEBUG_DRAW
+            auto item = DrawNode::create();
+            if (item)
+            {
+                addChild(item);
+                item->drawSolidRect({}, rect.size, Color32::green, 1.0f);
+                item->setPosition(rect.origin);
+            }
+#endif
         }
     }
 }
