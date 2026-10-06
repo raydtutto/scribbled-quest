@@ -43,6 +43,7 @@ AppPackages
 BundleArtifacts
 .vs/
 *.VC.db
+run.bat
 
 # Ignore files build by ndk and eclipse
 /libs/
