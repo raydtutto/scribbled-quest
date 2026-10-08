@@ -49,6 +49,11 @@ eGameLayerType getEntityType(const std::string& typeName)
 
     return eGameLayerType::NONE;
 }
+
+std::pair<int, int> getTilePosition(const Vec2 tileSize, const int tileX, const int tileY)
+{
+    return {ceil(tileX / tileSize.x) - 1, ceil(tileY / tileSize.y) - 1};
+}
 }  // namespace
 
 GameLayer* GameLayer::create(const std::string& levelName)
@@ -92,11 +97,6 @@ bool GameLayer::loadLevel(const std::string& levelName)
     return true;
 }
 
-std::pair<int, int> getTilePosition(const Vec2 tileSize, const int tileX, const int tileY)
-{
-    return {ceil(tileX / tileSize.x) - 1, ceil(tileY / tileSize.y) - 1};
-}
-
 void GameLayer::loadEntities()
 {
     auto entitiesGroup = _tmxMap->getObjectGroup("entities");
@@ -118,40 +118,47 @@ void GameLayer::loadEntities()
             std::string id = val["id"].asString();
             auto type = getEntityType(val["type"].asString());
 
-            // Get position tile numbers on the map, counted from the bottom
+            // Get position tile numbers on the map, counted from the left bottom
             auto tileX = static_cast<int>(val["x"].asFloat() + val["width"].asFloat() / 2);
             auto tileY = static_cast<int>(val["y"].asFloat() + val["height"].asFloat() / 2);
             auto tilePos = getTilePosition(tileSize, tileX, tileY);
             AXLOGI("id: {}, type: {}, position: [{}, {}]", id, getTypeName(type), tilePos.first, tilePos.second);
 
+            // Create entity
+            sSpawnEntity entity = {.type = eGameLayerType::NONE, .node = Node::create(), .spawnPos = tilePos};
             if (type == eGameLayerType::PLAYER)
             {
                 if (Player* player = Player::create())
                 {
-                    addChild(player);
-                    player->setPosition(val["x"].asFloat(), val["y"].asFloat());
-
-                    _spawnEntity.push_back(sSpawnEntity(eGameLayerType::PLAYER, player, tilePos));
+                    entity.node = player;
+                    entity.type = eGameLayerType::PLAYER;
                 }
             }
-
-            if (type == eGameLayerType::ENEMY)
+            else if (type == eGameLayerType::ENEMY)
             {
-                Enemy* enemy = Enemy::create();
-                if (enemy)
+                if (Enemy* enemy = Enemy::create())
                 {
-                    addChild(enemy);
-                    AXLOGD("Enemy created.");
-
-                    auto x = val["x"].asFloat();
-                    auto y = val["y"].asFloat();
-
-                    enemy->setPosition(val["x"].asFloat(), val["y"].asFloat());
+                    entity.node = enemy;
+                    entity.type = eGameLayerType::ENEMY;
                 }
+            }
+            // todo add world_object
+            else if (type == eGameLayerType::WORLD_OBJECT)
+            {
+                entity.type = eGameLayerType::NONE;
+            }
+
+            // Add entity to the scene, set position and store it in the list
+            if (entity.type != eGameLayerType::NONE)
+            {
+                addChild(entity.node);
+                entity.node->setPosition(val["x"].asFloat(), val["y"].asFloat());
+                _spawnEntity.push_back(entity);
             }
         }
     }
 }
+
 void GameLayer::loadObstacles()
 {
     auto obstaclesGroup = _tmxMap->getObjectGroup("obstacles");
@@ -168,7 +175,7 @@ void GameLayer::loadObstacles()
 
             _collisionList.push_back(rect);
 
-#ifdef DEBUG_DRAW
+#if DEBUG_DRAW
             auto item = DrawNode::create();
             if (item)
             {

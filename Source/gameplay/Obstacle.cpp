@@ -19,16 +19,14 @@ Obstacle* Obstacle::create()
 
 bool Obstacle::init()
 {
-    return true;
+    if (!Node::init())
+    {
+        return false;
+    }
 
-    // if (!Node::init())
-    // {
-    //     return false;
-    // }
-    //
-    // auto rect = DrawNode::create();
-    // addChild(rect);
-    // rect->drawRect({0,0}, {60,60}, Color32::green, 10.0f);
-    //
-    // return true;
+    auto rect = DrawNode::create();
+    addChild(rect);
+    rect->drawRect({0,0}, {60,60}, Color32::green, 10.0f);
+
+    return true;
 }

@@ -2,7 +2,6 @@
 
 #include "axmol/2d/FastTMXTiledMap.h"
 #include "axmol/scene/Node.h"
-#include "gameplay/Player.h"
 
 enum class eGameLayerType
 {
