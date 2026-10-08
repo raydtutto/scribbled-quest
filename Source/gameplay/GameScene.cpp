@@ -35,6 +35,12 @@ bool GameScene::init()
     {
         addChild(_gameLayer);
     }
+    else
+    {
+        AXLOGE("Level {} doesn't load", _gameLayer->getName());
+        AX_ASSERT(false);
+        // todo return to the main menu
+    }
 
     return true;
 }

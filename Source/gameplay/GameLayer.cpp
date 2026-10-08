@@ -80,27 +80,30 @@ bool GameLayer::loadLevel(const std::string& levelName)
     _tmxMap = ax::FastTMXTiledMap::create(levelName);
     if (!_tmxMap)
     {
-        AXLOGE("The level path '{}' failed to load.", levelName);
+        AXLOGE("Level {} failed to load.", levelName);
         return false;
     }
 
     if (!_tmxMap->getObjectGroup("entities") || !_tmxMap->getObjectGroup("obstacles"))
     {
-        AXLOGE("Object layers from the '{}' failed to load.", levelName);
+        AXLOGE("Level {}. Object layers failed to load.", levelName);
         return false;
     }
 
     addChild(_tmxMap);
-    loadEntities();
-    loadObstacles();
+    if (!loadEntities(levelName) || !loadObstacles(levelName))
+    {
+        return false;
+    }
 
     return true;
 }
 
-void GameLayer::loadEntities()
+bool GameLayer::loadEntities(const std::string& levelName)
 {
-    auto entitiesGroup = _tmxMap->getObjectGroup("entities");
-    auto tileSize = _tmxMap->getTileSize();
+    const auto entitiesGroup = _tmxMap->getObjectGroup("entities");
+    const auto tileSize = _tmxMap->getTileSize();
+    std::map<std::string, int> createdEntitiesCounter;
 
     _spawnEntity.clear();
     for (const auto& entityObj : entitiesGroup->getObjects())
@@ -112,7 +115,7 @@ void GameLayer::loadEntities()
             if (val["type"].getType() != Value::Type::STRING ||
                 getEntityType(val["type"].asString()) == eGameLayerType::NONE)
             {
-                AXLOGE("The entity '{}' failed to load, unsupported type.", val["id"].asString());
+                AXLOGE("Level {}. The entity '{}' failed to load, unsupported type.", levelName, val["id"].asString());
                 continue;
             }
             std::string id = val["id"].asString();
@@ -128,10 +131,12 @@ void GameLayer::loadEntities()
             sSpawnEntity entity = {.type = eGameLayerType::NONE, .node = Node::create(), .spawnPos = tilePos};
             if (type == eGameLayerType::PLAYER)
             {
+
                 if (Player* player = Player::create())
                 {
                     entity.node = player;
                     entity.type = eGameLayerType::PLAYER;
+                    createdEntitiesCounter[val["type"].asString()]++;
                 }
             }
             else if (type == eGameLayerType::ENEMY)
@@ -140,11 +145,12 @@ void GameLayer::loadEntities()
                 {
                     entity.node = enemy;
                     entity.type = eGameLayerType::ENEMY;
+                    createdEntitiesCounter[val["type"].asString()]++;
                 }
             }
-            // todo add world_object
             else if (type == eGameLayerType::WORLD_OBJECT)
             {
+                // todo add world_object
                 entity.type = eGameLayerType::NONE;
             }
 
@@ -157,9 +163,19 @@ void GameLayer::loadEntities()
             }
         }
     }
+
+    // Validation
+    if (createdEntitiesCounter["player"] != 1)
+    {
+        AXLOGE("Level {}. Player count is {}, must be only one player", levelName, createdEntitiesCounter["player"]);
+        AX_ASSERT(false);
+        return false;
+    }
+
+    return true;
 }
 
-void GameLayer::loadObstacles()
+bool GameLayer::loadObstacles(const std::string& levelName)
 {
     auto obstaclesGroup = _tmxMap->getObjectGroup("obstacles");
     for (const auto& obstacleObj : obstaclesGroup->getObjects())
@@ -173,11 +189,18 @@ void GameLayer::loadObstacles()
             rect.size.width = val["width"].asFloat();
             rect.size.height = val["height"].asFloat();
 
+            if (rect.size.width <= 0.f || rect.size.height <= 0.f)
+            {
+                AXLOGE("Level {}. Obstacle id {} has invalid size: width {}, height {}", levelName,
+                       val["id"].asString(), rect.size.width, rect.size.height);
+                AX_ASSERT(false);
+                return false;
+            }
+
             _collisionList.push_back(rect);
 
 #if DEBUG_DRAW
-            auto item = DrawNode::create();
-            if (item)
+            if (const auto item = DrawNode::create())
             {
                 addChild(item);
                 item->drawSolidRect({}, rect.size, Color32::green, 1.0f);
@@ -186,4 +209,6 @@ void GameLayer::loadObstacles()
 #endif
         }
     }
+
+    return true;
 }

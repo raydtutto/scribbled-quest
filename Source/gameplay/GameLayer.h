@@ -30,8 +30,8 @@ public:
 
 private:
     bool loadLevel(const std::string& levelName);
-    void loadEntities();
-    void loadObstacles();
+    bool loadEntities(const std::string& levelName);
+    bool loadObstacles(const std::string& levelName);
 
     // Tiled map with layers
     ax::FastTMXTiledMap* _tmxMap = nullptr;
