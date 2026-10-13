@@ -243,4 +243,5 @@ release_note_draft.txt
 
 # Claude Code
 CLAUDE.md
+.claude/
 docs/
