@@ -7,7 +7,9 @@
 #include "gameplay/Player.h"
 #include "gameplay/Enemy.h"
 #include "gameplay/WorldObject.h"
+#include "axmol/base/KeyboardEvent.h"
 
+// Third-party libraries
 #include "magic_enum/magic_enum_all.hpp"
 
 // Drawing level collisions
@@ -65,6 +67,7 @@ GameLayer* GameLayer::create(const std::string& levelName)
     GameLayer* pRet = new GameLayer();
     if (pRet->init() && pRet->loadLevel(levelName))
     {
+        pRet->initKeyboard();
         pRet->autorelease();
         return pRet;
     }
@@ -81,29 +84,30 @@ GameLayer::~GameLayer()
 
 bool GameLayer::loadLevel(const std::string& levelName)
 {
-    _tmxMap = ax::FastTMXTiledMap::create(levelName);
+    _currentLevelName = levelName;
+    _tmxMap = ax::FastTMXTiledMap::create(_currentLevelName);
     if (!_tmxMap)
     {
-        AXLOGE("Level {} failed to load.", levelName);
+        AXLOGE("Level {} failed to load.", _currentLevelName);
         return false;
     }
 
     if (!_tmxMap->getObjectGroup("entities") || !_tmxMap->getObjectGroup("obstacles"))
     {
-        AXLOGE("Level {}. Object layers failed to load.", levelName);
+        AXLOGE("Level {}. Object layers failed to load.", _currentLevelName);
         return false;
     }
 
     _gameplayObjects = _tmxMap->getLayer("gameplayObjects");
     if (!_gameplayObjects)
     {
-        AXLOGE("Level {}. Can't find gameplayObjects", levelName);
+        AXLOGE("Level {}. Can't find gameplayObjects", _currentLevelName);
         AX_ASSERT(false);
         return false;
     }
 
     addChild(_tmxMap);
-    if (!loadObstacles(levelName) || !loadEntities(levelName))
+    if (!loadObstacles() || !loadEntities())
     {
         return false;
     }
@@ -135,7 +139,7 @@ bool GameLayer::loadLevel(const std::string& levelName)
     return true;
 }
 
-bool GameLayer::loadEntities(const std::string& levelName)
+bool GameLayer::loadEntities()
 {
     const auto entitiesGroup = _tmxMap->getObjectGroup("entities");
     const auto tileSize = _tmxMap->getTileSize();
@@ -150,7 +154,8 @@ bool GameLayer::loadEntities(const std::string& levelName)
             if (val["type"].getType() != Value::Type::STRING ||
                 getEntityType(val["type"].asString()) == eGameLayerType::NONE)
             {
-                AXLOGE("Level {}. The entity '{}' failed to load, unsupported type.", levelName, val["id"].asString());
+                AXLOGE("Level {}. The entity '{}' failed to load, unsupported type.", _currentLevelName,
+                       val["id"].asString());
                 continue;
             }
             auto type = getEntityType(val["type"].asString());
@@ -168,7 +173,7 @@ bool GameLayer::loadEntities(const std::string& levelName)
                 {
                     if (_player)
                     {
-                        AXLOGE("Level {}. Must be only one player", levelName);
+                        AXLOGE("Level {}. Must be only one player", _currentLevelName);
                         AX_ASSERT(false);
                         return false;
                     }
@@ -200,7 +205,7 @@ bool GameLayer::loadEntities(const std::string& levelName)
             {
                 if (!addEntityToLayer(entity.node))
                 {
-                    AXLOGE("Level {}. Can't add node type {}, position {}, {}", levelName,
+                    AXLOGE("Level {}. Can't add node type {}, position {}, {}", _currentLevelName,
                            magic_enum::enum_name(entity.type), tilePos.first, tilePos.second);
                     AX_ASSERT(false);
                     return false;
@@ -214,14 +219,14 @@ bool GameLayer::loadEntities(const std::string& levelName)
 
     if (!_player)
     {
-        AXLOGE("Level {}. No player on the scene.", levelName);
+        AXLOGE("Level {}. No player on the scene.", _currentLevelName);
         AX_ASSERT(false);
         return false;
     }
     return true;
 }
 
-bool GameLayer::loadObstacles(const std::string& levelName)
+bool GameLayer::loadObstacles()
 {
     auto obstaclesGroup = _tmxMap->getObjectGroup("obstacles");
     for (const auto& obstacleObj : obstaclesGroup->getObjects())
@@ -237,7 +242,7 @@ bool GameLayer::loadObstacles(const std::string& levelName)
 
             if (rect.size.width <= 0.f || rect.size.height <= 0.f)
             {
-                AXLOGE("Level {}. Obstacle id {} has invalid size: width {}, height {}", levelName,
+                AXLOGE("Level {}. Obstacle id {} has invalid size: width {}, height {}", _currentLevelName,
                        val["id"].asString(), rect.size.width, rect.size.height);
                 AX_ASSERT(false);
                 return false;
@@ -261,7 +266,7 @@ bool GameLayer::loadObstacles(const std::string& levelName)
     return true;
 }
 
-bool GameLayer::addEntityToLayer(ax::Node* node)
+bool GameLayer::addEntityToLayer(ax::Node* node) const
 {
     if (!_tmxMap || !_gameplayObjects)
     {
@@ -270,4 +275,44 @@ bool GameLayer::addEntityToLayer(ax::Node* node)
 
     _gameplayObjects->addChild(node);
     return true;
+}
+
+void GameLayer::initKeyboard()
+{
+    auto listener = KeyboardEventListener::create();
+    if (!listener)
+    {
+        AXLOGE("Level {} failed to load KeyboardEventListener.", _currentLevelName);
+        AX_ASSERT(false);
+    }
+
+    listener->onKeyPressed = [this](KeyboardEvent* event) {
+        onKeyboardInput(event->getKeyCode(), true);
+    };
+
+    listener->onKeyReleased = [this](KeyboardEvent* event) {
+        onKeyboardInput(event->getKeyCode(), false);
+    };
+
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+}
+
+void GameLayer::onKeyboardInput(ax::KeyboardEvent::KeyCode keyCode, bool isPressed)
+{
+    using EventKeyCode = KeyboardEvent::KeyCode;
+    if (!(keyCode >= EventKeyCode::KEY_LEFT_ARROW && keyCode <= EventKeyCode::KEY_DOWN_ARROW) &&
+        keyCode != EventKeyCode::KEY_W && keyCode != EventKeyCode::KEY_A &&
+        keyCode != EventKeyCode::KEY_S && keyCode != EventKeyCode::KEY_D)
+    {
+        return;
+    }
+
+    if (isPressed)
+    {
+        AXLOGI("Key {} pressed", magic_enum::enum_name(keyCode));
+    }
+    else
+    {
+        AXLOGI("Key {} released", magic_enum::enum_name(keyCode));
+    }
 }

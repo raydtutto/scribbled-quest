@@ -2,6 +2,7 @@
 
 #include "axmol/2d/FastTMXTiledMap.h"
 #include "axmol/scene/Node.h"
+#include <climits>
 
 class Player;
 
@@ -16,7 +17,7 @@ enum class eGameLayerType
 
 enum class eZOrder
 {
-    DEBUG_DRAWING = 100
+    DEBUG_DRAWING = INT_MAX
 };
 
 struct sSpawnEntity
@@ -37,9 +38,14 @@ public:
 
 private:
     bool loadLevel(const std::string& levelName);
-    bool loadEntities(const std::string& levelName);
-    bool loadObstacles(const std::string& levelName);
-    bool addEntityToLayer(ax::Node* node);
+    bool loadEntities();
+    bool loadObstacles();
+    bool addEntityToLayer(ax::Node* node) const;
+    void initKeyboard();
+    void onKeyboardInput(ax::KeyboardEvent::KeyCode keyCode, bool isPressed);
+
+    // Current level name
+    std::string _currentLevelName;
 
     // Tiled map with layers
     ax::FastTMXTiledMap* _tmxMap = nullptr;
