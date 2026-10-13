@@ -64,6 +64,8 @@ include(AXGameTargetSetup)
 
 # mark app resources, resource will be copy auto after mark
 ax_setup_app_config(${APP_NAME})
+target_compile_definitions(${APP_NAME} PRIVATE MAGIC_ENUM_RANGE_MIN=-255)
+target_compile_definitions(${APP_NAME} PRIVATE MAGIC_ENUM_RANGE_MAX=255)
 
 # Add any libraries you need to link to the project after this point
 
