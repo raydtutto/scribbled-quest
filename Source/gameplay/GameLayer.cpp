@@ -2,9 +2,12 @@
 
 #include "axmol/2d/FastTMXTiledMap.h"
 #include "axmol/2d/DrawNode.h"
+#include "fmt/chrono.h"
 #include "gameplay/Obstacle.h"
 #include "gameplay/Player.h"
 #include "gameplay/Enemy.h"
+#include "gameplay/WorldObject.h"
+
 #include "magic_enum/magic_enum_all.hpp"
 
 // Drawing level collisions
@@ -91,11 +94,43 @@ bool GameLayer::loadLevel(const std::string& levelName)
         return false;
     }
 
+    _gameplayObjects = _tmxMap->getLayer("gameplayObjects");
+    if (!_gameplayObjects)
+    {
+        AXLOGE("Level {}. Can't find gameplayObjects", levelName);
+        AX_ASSERT(false);
+        return false;
+    }
+
     addChild(_tmxMap);
-    if (!loadEntities(levelName) || !loadObstacles(levelName))
+    if (!loadObstacles(levelName) || !loadEntities(levelName))
     {
         return false;
     }
+
+    // Set names to layers
+    _tmxMap->setName("tmxMap");
+    for (auto const& item : _tmxMap->getChildren())
+    {
+        if (FastTMXLayer* layer = dynamic_cast<FastTMXLayer*>(item))
+        {
+            layer->setName(layer->getLayerName());
+        }
+    }
+
+    // Find player position for debug
+    std::pair<int, int> playerPos = {0, 0};
+    for (const auto& item : _spawnEntity)
+    {
+        if (item.node == _player)
+        {
+            playerPos = item.spawnPos;
+            break;
+        }
+    }
+
+    AXLOGI("Player position in pixels is {}, {}. Tile numbers are {}, {}", _player->getPosition().x,
+           _player->getPosition().y, playerPos.first, playerPos.second);
 
     return true;
 }
@@ -104,7 +139,6 @@ bool GameLayer::loadEntities(const std::string& levelName)
 {
     const auto entitiesGroup = _tmxMap->getObjectGroup("entities");
     const auto tileSize = _tmxMap->getTileSize();
-    std::map<std::string, int> createdEntitiesCounter;
 
     _spawnEntity.clear();
     for (const auto& entityObj : entitiesGroup->getObjects())
@@ -119,25 +153,28 @@ bool GameLayer::loadEntities(const std::string& levelName)
                 AXLOGE("Level {}. The entity '{}' failed to load, unsupported type.", levelName, val["id"].asString());
                 continue;
             }
-            std::string id = val["id"].asString();
             auto type = getEntityType(val["type"].asString());
 
             // Get position tile numbers on the map, counted from the left bottom
             auto tileX = static_cast<int>(val["x"].asFloat() + val["width"].asFloat() / 2);
             auto tileY = static_cast<int>(val["y"].asFloat() + val["height"].asFloat() / 2);
             auto tilePos = getTilePosition(tileSize, tileX, tileY);
-            AXLOGI("id: {}, type: {}, position: [{}, {}]", id, getTypeName(type), tilePos.first, tilePos.second);
 
             // Create entity
-            sSpawnEntity entity = {.type = eGameLayerType::NONE, .node = Node::create(), .spawnPos = tilePos};
+            sSpawnEntity entity = {.type = eGameLayerType::NONE, .node = nullptr, .spawnPos = tilePos};
             if (type == eGameLayerType::PLAYER)
             {
-
                 if (Player* player = Player::create())
                 {
-                    entity.node = player;
+                    if (_player)
+                    {
+                        AXLOGE("Level {}. Must be only one player", levelName);
+                        AX_ASSERT(false);
+                        return false;
+                    }
+                    _player = player;
+                    entity.node = _player;
                     entity.type = eGameLayerType::PLAYER;
-                    createdEntitiesCounter[val["type"].asString()]++;
                 }
             }
             else if (type == eGameLayerType::ENEMY)
@@ -146,33 +183,41 @@ bool GameLayer::loadEntities(const std::string& levelName)
                 {
                     entity.node = enemy;
                     entity.type = eGameLayerType::ENEMY;
-                    createdEntitiesCounter[val["type"].asString()]++;
                 }
             }
             else if (type == eGameLayerType::WORLD_OBJECT)
             {
-                // todo add world_object
-                entity.type = eGameLayerType::NONE;
+                if (WorldObject* worldObject = WorldObject::create())
+                {
+                    entity.node = worldObject;
+                    entity.type = eGameLayerType::WORLD_OBJECT;
+                    // todo subclasses: star, chest, key
+                }
             }
 
             // Add entity to the scene, set position and store it in the list
             if (entity.type != eGameLayerType::NONE)
             {
-                addChild(entity.node);
+                if (!addEntityToLayer(entity.node))
+                {
+                    AXLOGE("Level {}. Can't add node type {}, position {}, {}", levelName,
+                           magic_enum::enum_name(entity.type), tilePos.first, tilePos.second);
+                    AX_ASSERT(false);
+                    return false;
+                }
+                entity.node->setName(getTypeName(entity.type) + " id " + val["id"].asString());
                 entity.node->setPosition(val["x"].asFloat(), val["y"].asFloat());
                 _spawnEntity.push_back(entity);
             }
         }
     }
 
-    // Validation
-    if (createdEntitiesCounter["player"] != 1)
+    if (!_player)
     {
-        AXLOGE("Level {}. Player count is {}, must be only one player", levelName, createdEntitiesCounter["player"]);
+        AXLOGE("Level {}. No player on the scene.", levelName);
         AX_ASSERT(false);
         return false;
     }
-
     return true;
 }
 
@@ -203,13 +248,26 @@ bool GameLayer::loadObstacles(const std::string& levelName)
 #if DEBUG_DRAW
             if (const auto item = DrawNode::create())
             {
-                addChild(item);
+                _tmxMap->addChild(item, magic_enum::enum_integer(eZOrder::DEBUG_DRAWING));
                 item->drawSolidRect({}, rect.size, Color32::green, 1.0f);
                 item->setPosition(rect.origin);
+                item->setName(getTypeName(eGameLayerType::OBSTACLE) + ": " + val["name"].asString() + " id " +
+                              val["id"].asString());
             }
 #endif
         }
     }
 
+    return true;
+}
+
+bool GameLayer::addEntityToLayer(ax::Node* node)
+{
+    if (!_tmxMap || !_gameplayObjects)
+    {
+        return false;
+    }
+
+    _gameplayObjects->addChild(node);
     return true;
 }
