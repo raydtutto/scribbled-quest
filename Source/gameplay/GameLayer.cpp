@@ -5,6 +5,7 @@
 #include "gameplay/Obstacle.h"
 #include "gameplay/Player.h"
 #include "gameplay/Enemy.h"
+#include "magic_enum/magic_enum_all.hpp"
 
 // Drawing level collisions
 #define DEBUG_DRAW 1

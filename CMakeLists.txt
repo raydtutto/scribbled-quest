@@ -39,6 +39,7 @@ file(GLOB_RECURSE GAME_SOURCE
 
 set(GAME_INC_DIRS
   "${CMAKE_CURRENT_SOURCE_DIR}/Source"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdPartyLibs"
 )
 
 set(content_folder
