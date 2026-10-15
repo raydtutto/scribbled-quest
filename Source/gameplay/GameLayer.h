@@ -2,6 +2,7 @@
 
 #include "axmol/2d/FastTMXTiledMap.h"
 #include "axmol/scene/Node.h"
+#include "axmol/base/KeyboardEvent.h"
 #include <climits>
 
 class Player;
@@ -12,6 +13,16 @@ enum class eGameLayerType
     ENEMY,
     WORLD_OBJECT,
     OBSTACLE,
+    NONE
+};
+
+enum class ePlayerAction
+{
+    LEFT,
+    RIGHT,
+    JUMP,
+    DOWN,
+    PICKUP,
     NONE
 };
 
@@ -41,7 +52,7 @@ private:
     bool loadEntities();
     bool loadObstacles();
     bool addEntityToLayer(ax::Node* node) const;
-    void initKeyboard();
+    bool initKeyboard();
     void onKeyboardInput(ax::KeyboardEvent::KeyCode keyCode, bool isPressed);
 
     // Current level name
@@ -53,10 +64,15 @@ private:
     // Tiled layer with objects
     ax::FastTMXLayer* _gameplayObjects = nullptr;
 
-    // Player
-    Player* _player = nullptr;
-
     // List of entities on map
     std::vector<sSpawnEntity> _spawnEntity;
     std::vector<ax::Rect> _collisionList;
+
+    // Player
+    Player* _player = nullptr;
+    bool _isHeldKeyLeft = false;
+    bool _isHeldKeyRight = false;
+    bool _isHeldKeyJump = false;
+    bool _isHeldKeyDown = false;
+    bool _isHeldKeyPickUp = false;
 };

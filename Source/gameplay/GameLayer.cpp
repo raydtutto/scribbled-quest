@@ -7,13 +7,13 @@
 #include "gameplay/Player.h"
 #include "gameplay/Enemy.h"
 #include "gameplay/WorldObject.h"
-#include "axmol/base/KeyboardEvent.h"
 
 // Third-party libraries
 #include "magic_enum/magic_enum_all.hpp"
 
-// Drawing level collisions
-#define DEBUG_DRAW 1
+// Debug only
+#define DEBUG_DRAW   1
+#define DEBUG_ACTION 1
 
 using namespace ax;
 
@@ -56,6 +56,39 @@ eGameLayerType getEntityType(const std::string& typeName)
     return eGameLayerType::NONE;
 }
 
+ePlayerAction getPlayerAction(ax::KeyboardEvent::KeyCode keyCode)
+{
+    using EventKeyCode = KeyboardEvent::KeyCode;
+
+    switch (keyCode)
+    {
+    case EventKeyCode::KEY_LEFT_ARROW:
+    case EventKeyCode::KEY_A:
+        return ePlayerAction::LEFT;
+        break;
+    case EventKeyCode::KEY_RIGHT_ARROW:
+    case EventKeyCode::KEY_D:
+        return ePlayerAction::RIGHT;
+        break;
+    case EventKeyCode::KEY_UP_ARROW:
+    case EventKeyCode::KEY_W:
+    case EventKeyCode::KEY_SPACE:
+        return ePlayerAction::JUMP;
+        break;
+    case EventKeyCode::KEY_DOWN_ARROW:
+    case EventKeyCode::KEY_S:
+        return ePlayerAction::DOWN;
+        break;
+    case EventKeyCode::KEY_E:
+        return ePlayerAction::PICKUP;
+        break;
+    default:
+        return ePlayerAction::NONE;
+        break;
+    }
+    return ePlayerAction::NONE;
+}
+
 std::pair<int, int> getTilePosition(const Vec2 tileSize, const int tileX, const int tileY)
 {
     return {ceil(tileX / tileSize.x) - 1, ceil(tileY / tileSize.y) - 1};
@@ -65,9 +98,8 @@ std::pair<int, int> getTilePosition(const Vec2 tileSize, const int tileX, const 
 GameLayer* GameLayer::create(const std::string& levelName)
 {
     GameLayer* pRet = new GameLayer();
-    if (pRet->init() && pRet->loadLevel(levelName))
+    if (pRet->init() && pRet->loadLevel(levelName) && pRet->initKeyboard())
     {
-        pRet->initKeyboard();
         pRet->autorelease();
         return pRet;
     }
@@ -277,42 +309,56 @@ bool GameLayer::addEntityToLayer(ax::Node* node) const
     return true;
 }
 
-void GameLayer::initKeyboard()
+bool GameLayer::initKeyboard()
 {
     auto listener = KeyboardEventListener::create();
     if (!listener)
     {
-        AXLOGE("Level {} failed to load KeyboardEventListener.", _currentLevelName);
+        AXLOGE("Level {}: failed to init keyboard.", _currentLevelName);
         AX_ASSERT(false);
+        return false;
     }
 
-    listener->onKeyPressed = [this](KeyboardEvent* event) {
-        onKeyboardInput(event->getKeyCode(), true);
-    };
+    listener->onKeyPressed = [this](KeyboardEvent* event) { onKeyboardInput(event->getKeyCode(), true); };
 
-    listener->onKeyReleased = [this](KeyboardEvent* event) {
-        onKeyboardInput(event->getKeyCode(), false);
-    };
+    listener->onKeyReleased = [this](KeyboardEvent* event) { onKeyboardInput(event->getKeyCode(), false); };
 
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+    return true;
 }
 
 void GameLayer::onKeyboardInput(ax::KeyboardEvent::KeyCode keyCode, bool isPressed)
 {
-    using EventKeyCode = KeyboardEvent::KeyCode;
-    if (!(keyCode >= EventKeyCode::KEY_LEFT_ARROW && keyCode <= EventKeyCode::KEY_DOWN_ARROW) &&
-        keyCode != EventKeyCode::KEY_W && keyCode != EventKeyCode::KEY_A &&
-        keyCode != EventKeyCode::KEY_S && keyCode != EventKeyCode::KEY_D)
+    const auto action = getPlayerAction(keyCode);
+    if (action == ePlayerAction::NONE)
     {
         return;
     }
 
-    if (isPressed)
+    switch (action)
     {
-        AXLOGI("Key {} pressed", magic_enum::enum_name(keyCode));
+    case ePlayerAction::LEFT:
+        _isHeldKeyLeft = isPressed;
+        break;
+    case ePlayerAction::RIGHT:
+        _isHeldKeyRight = isPressed;
+        break;
+    // todo
+    case ePlayerAction::JUMP:
+        _isHeldKeyJump = isPressed;
+        break;
+    case ePlayerAction::DOWN:
+        _isHeldKeyDown = isPressed;
+        break;
+    case ePlayerAction::PICKUP:
+        _isHeldKeyPickUp = isPressed;
+        break;
+    default:
+        break;
     }
-    else
-    {
-        AXLOGI("Key {} released", magic_enum::enum_name(keyCode));
-    }
+
+#if DEBUG_ACTION
+    AXLOGI("\nleft = {}\nright = {}\njump = {}\ndown = {}\npickup = {}", _isHeldKeyLeft, _isHeldKeyRight, _isHeldKeyJump,
+           _isHeldKeyDown, _isHeldKeyPickUp);
+#endif
 }
