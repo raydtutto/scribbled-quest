@@ -7,6 +7,7 @@
 #include "gameplay/Player.h"
 #include "gameplay/Enemy.h"
 #include "gameplay/WorldObject.h"
+#include "gameplay/InputState.h"
 
 // Third-party libraries
 #include "magic_enum/magic_enum_all.hpp"
@@ -115,28 +116,21 @@ void GameLayer::update(float dt)
 {
     ax::Node::update(dt);
 
-    // Set direction: right = 1, left = -1, none = 0
-    int direction = 0;
-    if (_inputActions[ePlayerAction::RIGHT] > 0 && _inputActions[ePlayerAction::LEFT] > 0)
-    {
-        direction = 0;
-    }
-    else if (_inputActions[ePlayerAction::RIGHT] > 0)
-    {
-        direction = 1;
-    }
-    else if (_inputActions[ePlayerAction::LEFT] > 0)
-    {
-        direction = -1;
-    }
-    _player->setDirection(direction);
+    const sInputState inputState = {
+        .isRightHeld = _inputActions[ePlayerAction::RIGHT] > 0,
+        .isLeftHeld = _inputActions[ePlayerAction::LEFT] > 0,
+        .isJumpHeld = _inputActions[ePlayerAction::JUMP] > 0,
+        .isDownHeld = _inputActions[ePlayerAction::DOWN] > 0
+    };
+
+    _player->applyActionInput(inputState);
 
     // Move entity
     const auto position = _player->getPosition();
     _player->setPosition(position + _player->getVelocity() * dt);
 
 #if DEBUG_ACTION_UPDATE
-    AXLOGD("Player's velocity {} and direction {}", _player->getVelocity().x, direction);
+    AXLOGD("Player's velocity {} and direction {}", _player->getVelocity().x, _player->getDirection());
 #endif
 }
 

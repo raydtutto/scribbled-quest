@@ -34,14 +34,36 @@ bool Player::init()
     return true;
 }
 
-void Player::setDirection(int direction)
+void Player::applyActionInput(const sInputState& inputState)
 {
-    _velocity.x = direction * _movementSpeed;
-
-    // Flip node
-    if (direction != 0)
+    // Set direction: right = 1, left = -1, none = 0
+    _direction = 0;
+    if (inputState.isRightHeld && inputState.isLeftHeld)
     {
-        if (direction == 1)
+        _direction = 0;
+    }
+    else if (inputState.isRightHeld)
+    {
+        _direction = 1;
+    }
+    else if (inputState.isLeftHeld)
+    {
+        _direction = -1;
+    }
+    updateVelocity();
+    flipNode();
+}
+
+void Player::updateVelocity()
+{
+    _velocity.x = _direction * _movementSpeed;
+}
+
+void Player::flipNode()
+{
+    if (_direction != 0)
+    {
+        if (_direction == 1)
         {
             _drawRect->setPosition(0.f, 0.f);
         }
@@ -49,6 +71,6 @@ void Player::setDirection(int direction)
         {
             _drawRect->setPosition(getContentSize().x, 0.f);
         }
-        _drawRect->setScaleX(direction);
+        _drawRect->setScaleX(_direction);
     }
 }
