@@ -100,6 +100,7 @@ GameLayer* GameLayer::create(const std::string& levelName)
     GameLayer* pRet = new GameLayer();
     if (pRet->init() && pRet->loadLevel(levelName) && pRet->initKeyboard())
     {
+        pRet->scheduleUpdate();
         pRet->autorelease();
         return pRet;
     }
@@ -107,6 +108,23 @@ GameLayer* GameLayer::create(const std::string& levelName)
     delete pRet;
     pRet = nullptr;
     return nullptr;
+}
+
+void GameLayer::update(float dt)
+{
+    ax::Node::update(dt);
+
+    // Set direction: right = 1, left = -1, none = 0
+    const auto direction = _isHeldKeyRight - _isHeldKeyLeft;
+    _player->setDirection(direction);
+
+    // Move entity
+    const auto position = _player->getPosition();
+    _player->setPosition(position + _player->getVelocity() * dt);
+
+#if DEBUG_ACTION
+    AXLOGD("Player's velocity {} and direction {}", _player->getVelocity().x, direction);
+#endif
 }
 
 GameLayer::~GameLayer()
@@ -350,15 +368,12 @@ void GameLayer::onKeyboardInput(ax::KeyboardEvent::KeyCode keyCode, bool isPress
     case ePlayerAction::DOWN:
         _isHeldKeyDown = isPressed;
         break;
-    case ePlayerAction::PICKUP:
-        _isHeldKeyPickUp = isPressed;
-        break;
     default:
         break;
     }
 
 #if DEBUG_ACTION
-    AXLOGI("\nleft = {}\nright = {}\njump = {}\ndown = {}\npickup = {}", _isHeldKeyLeft, _isHeldKeyRight, _isHeldKeyJump,
-           _isHeldKeyDown, _isHeldKeyPickUp);
+    AXLOGI("\nleft = {}\nright = {}\njump = {}\ndown = {}", _isHeldKeyLeft, _isHeldKeyRight, _isHeldKeyJump,
+           _isHeldKeyDown);
 #endif
 }

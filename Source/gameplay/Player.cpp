@@ -30,3 +30,8 @@ bool Player::init()
 
     return true;
 }
+
+void Player::setDirection(int direction)
+{
+    _velocity.x = direction * _movementSpeed;
+}

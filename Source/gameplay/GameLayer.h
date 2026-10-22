@@ -43,6 +43,7 @@ class GameLayer : public ax::Node
 public:
     // Create level
     static GameLayer* create(const std::string& levelName);
+    void update(float dt) override;
 
     GameLayer() {}
     ~GameLayer() override;
@@ -74,5 +75,4 @@ private:
     bool _isHeldKeyRight = false;
     bool _isHeldKeyJump = false;
     bool _isHeldKeyDown = false;
-    bool _isHeldKeyPickUp = false;
 };
