@@ -63,7 +63,11 @@ set(APP_SOURCES
 include(AXGameTargetSetup)
 
 # mark app resources, resource will be copy auto after mark
-ax_setup_app_config(${APP_NAME})
+if (WINDOWS)
+  ax_setup_app_config(${APP_NAME} CONSOLE)
+else ()
+  ax_setup_app_config(${APP_NAME})
+endif ()
 target_compile_definitions(${APP_NAME} PRIVATE MAGIC_ENUM_RANGE_MIN=-255)
 target_compile_definitions(${APP_NAME} PRIVATE MAGIC_ENUM_RANGE_MAX=255)
 
