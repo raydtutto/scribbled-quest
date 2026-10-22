@@ -4,6 +4,7 @@
 #include "axmol/scene/Node.h"
 #include "axmol/base/KeyboardEvent.h"
 #include <climits>
+#include <map>
 
 class Player;
 
@@ -71,8 +72,5 @@ private:
 
     // Player
     Player* _player = nullptr;
-    bool _isHeldKeyLeft = false;
-    bool _isHeldKeyRight = false;
-    bool _isHeldKeyJump = false;
-    bool _isHeldKeyDown = false;
+    std::map<ePlayerAction, int> _inputActions;
 };

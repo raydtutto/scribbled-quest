@@ -12,8 +12,9 @@
 #include "magic_enum/magic_enum_all.hpp"
 
 // Debug only
-#define DEBUG_DRAW   1
-#define DEBUG_ACTION 1
+#define DEBUG_DRAW          1
+#define DEBUG_ACTION        1
+#define DEBUG_ACTION_UPDATE 0
 
 using namespace ax;
 
@@ -115,14 +116,26 @@ void GameLayer::update(float dt)
     ax::Node::update(dt);
 
     // Set direction: right = 1, left = -1, none = 0
-    const auto direction = _isHeldKeyRight - _isHeldKeyLeft;
+    int direction = 0;
+    if (_inputActions[ePlayerAction::RIGHT] > 0 && _inputActions[ePlayerAction::LEFT] > 0)
+    {
+        direction = 0;
+    }
+    else if (_inputActions[ePlayerAction::RIGHT] > 0)
+    {
+        direction = 1;
+    }
+    else if (_inputActions[ePlayerAction::LEFT] > 0)
+    {
+        direction = -1;
+    }
     _player->setDirection(direction);
 
     // Move entity
     const auto position = _player->getPosition();
     _player->setPosition(position + _player->getVelocity() * dt);
 
-#if DEBUG_ACTION
+#if DEBUG_ACTION_UPDATE
     AXLOGD("Player's velocity {} and direction {}", _player->getVelocity().x, direction);
 #endif
 }
@@ -353,27 +366,29 @@ void GameLayer::onKeyboardInput(ax::KeyboardEvent::KeyCode keyCode, bool isPress
         return;
     }
 
-    switch (action)
+    if (isPressed)
     {
-    case ePlayerAction::LEFT:
-        _isHeldKeyLeft = isPressed;
-        break;
-    case ePlayerAction::RIGHT:
-        _isHeldKeyRight = isPressed;
-        break;
-    // todo
-    case ePlayerAction::JUMP:
-        _isHeldKeyJump = isPressed;
-        break;
-    case ePlayerAction::DOWN:
-        _isHeldKeyDown = isPressed;
-        break;
-    default:
-        break;
+        _inputActions[action]++;
+    }
+    else
+    {
+        _inputActions[action]--;
+        if (_inputActions[action] < 0)
+        {
+            AXLOGE("Level {}: action {} counter is below zero.", _currentLevelName, action);
+            AX_ASSERT(false);
+            _inputActions[action] = 0;
+        }
     }
 
 #if DEBUG_ACTION
-    AXLOGI("\nleft = {}\nright = {}\njump = {}\ndown = {}", _isHeldKeyLeft, _isHeldKeyRight, _isHeldKeyJump,
-           _isHeldKeyDown);
+    std::string data;
+    for (const auto& [first, second] : _inputActions)
+    {
+        if (!data.empty())
+            data += "; ";
+        data += fmt::format("action: {} status: {}", magic_enum::enum_name(first), second);
+    }
+    AXLOGI("{}", data);
 #endif
 }

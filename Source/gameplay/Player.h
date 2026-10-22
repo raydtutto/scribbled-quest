@@ -17,4 +17,5 @@ public:
 private:
     float _movementSpeed = 240;
     ax::Vec2 _velocity;
+    ax::DrawNode* _drawRect = nullptr;
 };
