@@ -34,6 +34,11 @@ bool Player::init()
     return true;
 }
 
+void Player::updateGravity(float dt)
+{
+    _velocity.y -= _gravity * dt;
+}
+
 void Player::applyActionInput(const sInputState& inputState)
 {
     // Set direction: right = 1, left = -1, none = 0

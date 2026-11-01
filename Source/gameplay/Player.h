@@ -9,8 +9,11 @@ public:
     static Player* create();
 
     bool init() override;
-    ax::Vec2 getVelocity() const { return _velocity; }
     void applyActionInput(const sInputState& inputState);
+    void updateGravity(float dt);
+    void entityLanded() { _velocity.y = 0.f; }
+
+    ax::Vec2 getVelocity() const { return _velocity; }
     int getDirection() const { return _direction; }
 
     Player() {}
@@ -21,6 +24,7 @@ private:
     void flipNode();
 
     float _movementSpeed = 240;
+    float _gravity = 5000.f;
     ax::Vec2 _velocity;
     int _direction = 0;
     ax::DrawNode* _drawRect = nullptr;

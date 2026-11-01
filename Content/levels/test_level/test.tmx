@@ -25,7 +25,7 @@
   </data>
  </layer>
  <objectgroup id="7" name="entities">
-  <object id="1" name="player" x="0" y="780" width="60" height="60">
+  <object id="1" name="player" x="0" y="720" width="60" height="60">
    <properties>
     <property name="type" value="player"/>
    </properties>

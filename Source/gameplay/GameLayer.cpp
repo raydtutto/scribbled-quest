@@ -124,10 +124,25 @@ void GameLayer::update(float dt)
     };
 
     _player->applyActionInput(inputState);
+    _player->updateGravity(dt);
 
-    // Move entity
-    const auto position = _player->getPosition();
-    _player->setPosition(position + _player->getVelocity() * dt);
+    // Move entity by X
+    auto playerPos = _player->getPosition();
+    _player->setPositionX(playerPos.x + _player->getVelocity().x * dt);
+
+    // Move entity by Y
+    _player->setPositionY(playerPos.y + _player->getVelocity().y * dt);
+    for (auto const& item : _collisionList)
+    {
+        if (item.intersectsRect(_player->getBoundingBox()))
+        {
+            if (_player->getVelocity().y < 0)
+            {
+                _player->setPositionY(item.getMaxY());
+                _player->entityLanded();
+            }
+        }
+    }
 
 #if DEBUG_ACTION_UPDATE
     AXLOGD("Player's velocity {} and direction {}", _player->getVelocity().x, _player->getDirection());
