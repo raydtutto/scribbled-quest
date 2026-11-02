@@ -11,10 +11,12 @@ public:
     bool init() override;
     void applyActionInput(const sInputState& inputState);
     void updateGravity(float dt);
-    void entityLanded() { _velocity.y = 0.f; }
+    void entityLanded();
+    void entityIsInAir() { _onGround = false; }
 
     ax::Vec2 getVelocity() const { return _velocity; }
     int getDirection() const { return _direction; }
+    bool isOnGround() const { return _onGround; }
 
     Player() {}
     ~Player() {}
@@ -23,9 +25,12 @@ private:
     void updateVelocity();
     void flipNode();
 
-    float _movementSpeed = 240;
+    float _movementSpeed = 240.f;
     float _gravity = 5000.f;
+    float _jumpSpeed = 1300.f;
     ax::Vec2 _velocity;
     int _direction = 0;
+    bool _onGround = false;
+    bool _wasJumpHeld = false;
     ax::DrawNode* _drawRect = nullptr;
 };

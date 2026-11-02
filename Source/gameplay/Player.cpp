@@ -39,6 +39,12 @@ void Player::updateGravity(float dt)
     _velocity.y -= _gravity * dt;
 }
 
+void Player::entityLanded()
+{
+    _velocity.y = 0.f;
+    _onGround = true;
+}
+
 void Player::applyActionInput(const sInputState& inputState)
 {
     // Set direction: right = 1, left = -1, none = 0
@@ -57,6 +63,14 @@ void Player::applyActionInput(const sInputState& inputState)
     }
     updateVelocity();
     flipNode();
+
+    // Jump
+    if (inputState.isJumpHeld && !_wasJumpHeld && _onGround)
+    {
+        _onGround = false;
+        _velocity.y = _jumpSpeed;
+    }
+    _wasJumpHeld = inputState.isJumpHeld;
 }
 
 void Player::updateVelocity()

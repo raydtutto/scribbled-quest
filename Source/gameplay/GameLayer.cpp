@@ -15,7 +15,7 @@
 // Debug only
 #define DEBUG_DRAW          1
 #define DEBUG_ACTION        1
-#define DEBUG_ACTION_UPDATE 0
+#define DEBUG_ACTION_UPDATE 1
 
 using namespace ax;
 
@@ -116,12 +116,10 @@ void GameLayer::update(float dt)
 {
     ax::Node::update(dt);
 
-    const sInputState inputState = {
-        .isRightHeld = _inputActions[ePlayerAction::RIGHT] > 0,
-        .isLeftHeld = _inputActions[ePlayerAction::LEFT] > 0,
-        .isJumpHeld = _inputActions[ePlayerAction::JUMP] > 0,
-        .isDownHeld = _inputActions[ePlayerAction::DOWN] > 0
-    };
+    const sInputState inputState = {.isRightHeld = _inputActions[ePlayerAction::RIGHT] > 0,
+                                    .isLeftHeld = _inputActions[ePlayerAction::LEFT] > 0,
+                                    .isJumpHeld = _inputActions[ePlayerAction::JUMP] > 0,
+                                    .isDownHeld = _inputActions[ePlayerAction::DOWN] > 0};
 
     _player->applyActionInput(inputState);
     _player->updateGravity(dt);
@@ -132,6 +130,7 @@ void GameLayer::update(float dt)
 
     // Move entity by Y
     _player->setPositionY(playerPos.y + _player->getVelocity().y * dt);
+    _player->entityIsInAir();
     for (auto const& item : _collisionList)
     {
         if (item.intersectsRect(_player->getBoundingBox()))
@@ -145,7 +144,8 @@ void GameLayer::update(float dt)
     }
 
 #if DEBUG_ACTION_UPDATE
-    AXLOGD("Player's velocity {} and direction {}", _player->getVelocity().x, _player->getDirection());
+    AXLOGD("Player's velocity [{}, {}], direction = {}, onGround = {}", _player->getVelocity().x,
+           _player->getVelocity().y, _player->getDirection(), _player->isOnGround());
 #endif
 }
 
