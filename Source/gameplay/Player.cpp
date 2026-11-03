@@ -1,7 +1,17 @@
 #include "Player.h"
 #include "axmol/2d/DrawNode.h"
+#include <cmath>
 
 using namespace ax;
+
+namespace
+{
+constexpr ax::Vec2 kTileSize = {60.f, 60.f};
+constexpr float kGravity = 6500.f;
+constexpr float kJumpHeight = kTileSize.y * 2.7f;
+const float kJumpSpeed = std::sqrt(kJumpHeight * (2.f * kGravity));
+constexpr float kMovementSpeed = 340.f;
+}  // namespace
 
 Player* Player::create()
 {
@@ -24,19 +34,19 @@ bool Player::init()
         return false;
     }
 
-    setContentSize({60.f, 60.f});
+    setContentSize(kTileSize);
 
     _drawRect = DrawNode::create();
     addChild(_drawRect);
-    _drawRect->drawRect({0, 0}, getContentSize(), Color32::blue, 10.0f);
-    _drawRect->drawSolidCircle({50, 50}, 5.f, Color32::red);
+    _drawRect->drawRect({0, 0}, getContentSize(), Color32::blue, 10.f);
+    _drawRect->drawSolidCircle({kTileSize.x - 10.f, kTileSize.y - 10.f}, 5.f, Color32::red);
 
     return true;
 }
 
 void Player::updateGravity(float dt)
 {
-    _velocity.y -= _gravity * dt;
+    _velocity.y -= kGravity * dt;
 }
 
 void Player::entityLanded()
@@ -68,14 +78,14 @@ void Player::applyActionInput(const sInputState& inputState)
     if (inputState.isJumpHeld && !_wasJumpHeld && _onGround)
     {
         _onGround = false;
-        _velocity.y = _jumpSpeed;
+        _velocity.y = kJumpSpeed;
     }
     _wasJumpHeld = inputState.isJumpHeld;
 }
 
 void Player::updateVelocity()
 {
-    _velocity.x = _direction * _movementSpeed;
+    _velocity.x = _direction * kMovementSpeed;
 }
 
 void Player::flipNode()

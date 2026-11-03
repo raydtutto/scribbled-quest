@@ -25,9 +25,6 @@ private:
     void updateVelocity();
     void flipNode();
 
-    float _movementSpeed = 240.f;
-    float _gravity = 5000.f;
-    float _jumpSpeed = 1300.f;
     ax::Vec2 _velocity;
     int _direction = 0;
     bool _onGround = false;
