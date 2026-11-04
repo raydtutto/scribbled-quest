@@ -8,7 +8,7 @@ namespace
 {
 constexpr ax::Vec2 kTileSize = {60.f, 60.f};
 constexpr float kGravity = 6500.f;
-constexpr float kJumpHeight = kTileSize.y * 2.7f;
+constexpr float kJumpHeight = kTileSize.y * 3.4f;
 const float kJumpSpeed = std::sqrt(kJumpHeight * (2.f * kGravity));
 constexpr float kMovementSpeed = 340.f;
 }  // namespace
@@ -79,6 +79,11 @@ void Player::applyActionInput(const sInputState& inputState)
     {
         _onGround = false;
         _velocity.y = kJumpSpeed;
+    }
+    // Cut jump
+    if (!inputState.isJumpHeld && _wasJumpHeld && _velocity.y > 0)
+    {
+        _velocity.y *= 0.4f;
     }
     _wasJumpHeld = inputState.isJumpHeld;
 }
