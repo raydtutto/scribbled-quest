@@ -3,6 +3,7 @@
 #include "axmol/2d/FastTMXTiledMap.h"
 #include "axmol/scene/Node.h"
 #include "axmol/base/KeyboardEvent.h"
+#include "axmol/2d/DrawNode.h"
 #include <climits>
 #include <map>
 
@@ -72,5 +73,6 @@ private:
 
     // Player
     Player* _player = nullptr;
+    ax::DrawNode* _debugPlayerBox = nullptr;
     std::map<ePlayerAction, int> _inputActions;
 };

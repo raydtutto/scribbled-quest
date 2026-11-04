@@ -1,7 +1,6 @@
 #include "GameLayer.h"
 
 #include "axmol/2d/FastTMXTiledMap.h"
-#include "axmol/2d/DrawNode.h"
 #include "fmt/chrono.h"
 #include "gameplay/Obstacle.h"
 #include "gameplay/Player.h"
@@ -95,6 +94,12 @@ std::pair<int, int> getTilePosition(const Vec2 tileSize, const int tileX, const 
 {
     return {ceil(tileX / tileSize.x) - 1, ceil(tileY / tileSize.y) - 1};
 }
+
+bool isOverlapping(const Rect& entity, const Rect& box)
+{
+    return !(entity.getMaxX() <= box.getMinX() || box.getMaxX() <= entity.getMinX() ||
+             entity.getMaxY() <= box.getMinY() || box.getMaxY() <= entity.getMinY());
+}
 }  // namespace
 
 GameLayer* GameLayer::create(const std::string& levelName)
@@ -127,13 +132,29 @@ void GameLayer::update(float dt)
     // Move entity by X
     auto playerPos = _player->getPosition();
     _player->setPositionX(playerPos.x + _player->getVelocity().x * dt);
+    for (auto const& item : _collisionList)
+    {
+        const auto playerBox = _player->getBoundingBox();
+        if (isOverlapping(playerBox, item))
+        {
+            if (_player->getVelocity().x > 0)
+            {
+                _player->setPositionX(item.getMinX() - playerBox.size.width);
+            }
+            else if (_player->getVelocity().x < 0)
+            {
+                _player->setPositionX(item.getMaxX());
+            }
+        }
+    }
 
     // Move entity by Y
     _player->setPositionY(playerPos.y + _player->getVelocity().y * dt);
     _player->entityIsInAir();
     for (auto const& item : _collisionList)
     {
-        if (item.intersectsRect(_player->getBoundingBox()))
+        const auto playerBox = _player->getBoundingBox();
+        if (isOverlapping(playerBox, item))
         {
             if (_player->getVelocity().y < 0)
             {
@@ -142,6 +163,16 @@ void GameLayer::update(float dt)
             }
         }
     }
+
+#if DEBUG_DRAW
+    if (_debugPlayerBox)
+    {
+        const auto playerBox = _player->getBoundingBox();
+        _debugPlayerBox->clear();
+        _debugPlayerBox->drawRect({playerBox.getMinX(), playerBox.getMinY()},
+                                  {playerBox.getMaxX(), playerBox.getMaxY()}, Color32::red, 2.f);
+    }
+#endif
 
 #if DEBUG_ACTION_UPDATE
     AXLOGD("Player's velocity [{}, {}], direction = {}, onGround = {}", _player->getVelocity().x,
@@ -183,6 +214,12 @@ bool GameLayer::loadLevel(const std::string& levelName)
     {
         return false;
     }
+
+#if DEBUG_DRAW
+    // Player debug box
+    _debugPlayerBox = DrawNode::create();
+    _tmxMap->addChild(_debugPlayerBox, magic_enum::enum_integer(eZOrder::DEBUG_DRAWING));
+#endif
 
     // Set names to layers
     _tmxMap->setName("tmxMap");
